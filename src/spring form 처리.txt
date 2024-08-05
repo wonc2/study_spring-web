@@ -1,0 +1,134 @@
+
+@Controller
+public class BoardController {
+    /*
+     * 메뉴에서 목록을 클릭했을 때
+     * 요청 URL = /board/list
+     *
+     * 리스트 화면에서 페이지 번호를 클릭했을 때
+     * 요청 URL = /board/list?page=2
+     *
+     * 리스트 화면에서 검색어를 입력하고 검색버튼을 클릭했을 때
+     * 요청 URL = /board/list?opt=title&keyword=스프링
+     *
+     * 리스트 화면에서 정렬순서를 변경했을 때
+     * 요청 URL = /board/list?sort=likes
+     */
+
+    // 한번이라도 안오는 경우가 있다면 required = false
+    // 올수도 있고 안올수도 있는데 null 값이 오면 안되면 defaultValue 설정 해줘야함
+    // 요청 URL 에서 올 수 있는 모든 파람 경우의수 생각해서 요청 핸들러 메서드의 매개변수로 받아야함
+
+    @GetMapping("/list")
+    public String list(@RequestParam(value = "page", required = false, defaultValue = "1") int page,
+                       @RequestParam(name = "opt", required = false) String opt,
+                       @RequestParam(name = "keyword", required = false) String keyword,
+                       @RequestParam(name = "sort", required = false, defaultValue = "date") String sort) {
+        Map<String, Object> param = new HashMap<>();
+        param.put("page", page);
+        param.put("opt", opt);
+        param.put("keyword", keyword);
+        param.put("sort", sort);
+//        List<Board> board = boardService.getBoards(param);
+        return "board/list";
+    }
+}
+
+    /* 첨부파일이 있는 form */
+<form method="post" action="%" enctype="multipart/form-data">
+    <input type="text" name="id">
+    <input type="text" name="name">
+    <input type="file" name="photofiles">
+    <input type="file" name="photofiles">
+    <input type="file" name="attachfile">
+</form>
+
+    /* 첨부파일이 있는 폼 받는 엔티티 or dto 클래스 */
+public class UserRegisterForm {
+    private String id;
+    private String name;
+    private MultipartFile photofile; 
+    
+    // form input에 file이 있으면  MultipartFile을 꼭 정의해야함
+    // form input에 name이 같은 file이 여러개 있으면 List<MultipartFile> 로 해서 리스트에 담으면 됨
+    // 다른 이름이면 MultipartFile 하나 더 만들어서 쓰면됨
+    // 파일이 업로드되면 서버의 임시 디렉토리에 올라옴 내가 원하는 위치에 저장하려면 멀티파트 메서드들 활용해서 코딩하면댐
+    // 멀티파트파일은 업로드된 파일이 있든 없든 폼에 file이 있다면 null 값이 아님
+}
+    
+    /* 첨부파일이 있는 폼 처리하는 컨트롤러 */
+@Controller
+public String register(UserRegisterForm form){
+    // form변수에 UserRegisterForm 객체가 전달된다.
+    // form변수에 전달된 UserRegisterForm객체에는 입력폼에서 입력한 모든 값이 각각의 멤버변수에 대입되어 있다.
+    
+    userService.register(form)
+    return "redirect";    
+}
+
+
+
+public class FileUtils{
+    public static String saveFile(MultipartFile multipartFile, String directory){
+        if (multipartFile == null) {
+            return null;
+        }
+        if (multipartFile.isEmpty()){
+            return null;
+        }
+        String filename = multipartFile.getOriginalFileName();
+        multipartFile.transferTo(new File(directory, filename));
+
+        return filename;
+    }
+}
+
+@Service
+public class UserService{
+    public void register(UserRegisterForm form){
+        String photofilename = FileUtils.saveFile(form.getPhotofile(), "/resources/images");
+        User user = new User();
+        user.setid(form.getid());
+        user.setName(form.getName());
+        user.setFilename(photofilename);
+        userRepository.save(user);
+    }
+}
+
+
+ // 빠른 종료 - 나쁜 경우(로그인시 아이디비번틀림, 가입시 아이디중복 등)그즉시 Exception이든 return이든 해서 틀린 시점에서 바로 종료를 시켜야함
+ // if - else 로 피라미드 쌓기 절대 x ㅋㅋ
+
+public void login(String id, String password){
+    User user = userRepository.findByUserId(id);
+    if(user == null) {
+        throw new RuntimeException("아이디 틀림");
+    }
+    if(password == null) {
+        throw new RuntimeException("비번 틀림)"
+    }
+}
+
+스프링의 예외처리
+
+@ControllerAdvice
+public class 컨트롤러예외처리{
+
+    @ExceptionHandler(Exception.class)
+    public String handleException(Exception ex) {
+        log.error(ex); // Exception 매개변수로 받아와서 에러 로그 찍을수 있음
+        ex.printStackTrace(); // 에러 로그 ?
+        return "error/500"; // templates/error/500 으로 감
+    }
+
+    @ExceptionHandler(DataAccessException.class)
+    public String handleDataAccessException(DataAccessException ex){
+        reutrn "error/db"; // templates/error/db 로 감
+    }
+
+    @ExceptionHandler(BookStoreException.class)
+    public String handleBookStoreException(BookStoreException ex){
+        reutrn "error/store" // templates/error/store 로 감
+    }
+}
+
