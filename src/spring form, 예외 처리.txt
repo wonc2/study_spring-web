@@ -109,7 +109,7 @@ public void login(String id, String password){
     }
 }
 
-스프링의 예외처리
+스프링의 예외처리 ( 선언적 예외처리) / @RestController는 다르게 처리해야함
 
 @ControllerAdvice
 public class 컨트롤러예외처리{
@@ -131,4 +131,12 @@ public class 컨트롤러예외처리{
         reutrn "error/store" // templates/error/store 로 감
     }
 }
+
+스프링 예외처리 - AppResponse<T> 검색해서 공부
+요청 json이면 예외도 json으로 응답?
+
+@RestCon...,Con...~Advice 만들어서 예외 한군데서 처리
+RuntimeException 발생시키지말고 항상 사용자 정의 Exception 만들어서 사용
+-> 내가 예상한 에러 = 사용자정의 Exception
+예외에대한 일괄처리를 구현할수있따
 
